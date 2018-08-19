@@ -29,6 +29,7 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Pip));
             this.screenPicture = new System.Windows.Forms.PictureBox();
             this.RightClickMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.CloseMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -91,8 +92,9 @@
             this.Controls.Add(this.screenPicture);
             this.DoubleBuffered = true;
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "Pip";
-            this.ShowIcon = false;
+            this.Text = "Picture-In-Picture";
             this.TopMost = true;
             this.ClientSizeChanged += new System.EventHandler(this.OnClientResize);
             this.MouseDown += new System.Windows.Forms.MouseEventHandler(this.OnMouseDown);

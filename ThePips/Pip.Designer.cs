@@ -46,7 +46,7 @@
             this.screenPicture.Location = new System.Drawing.Point(0, 0);
             this.screenPicture.Margin = new System.Windows.Forms.Padding(0);
             this.screenPicture.Name = "screenPicture";
-            this.screenPicture.Size = new System.Drawing.Size(937, 537);
+            this.screenPicture.Size = new System.Drawing.Size(480, 270);
             this.screenPicture.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.screenPicture.TabIndex = 0;
             this.screenPicture.TabStop = false;
@@ -87,19 +87,21 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(937, 537);
+            this.ClientSize = new System.Drawing.Size(480, 270);
             this.ContextMenuStrip = this.RightClickMenu;
             this.ControlBox = false;
             this.Controls.Add(this.screenPicture);
             this.DoubleBuffered = true;
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.Location = new System.Drawing.Point(300, 300);
             this.Name = "Pip";
             this.StartPosition = System.Windows.Forms.FormStartPosition.Manual;
             this.Text = "Picture-In-Picture";
             this.TopMost = true;
             this.ClientSizeChanged += new System.EventHandler(this.OnClientResize);
             this.MouseDown += new System.Windows.Forms.MouseEventHandler(this.OnMouseDown);
+            this.Move += new System.EventHandler(this.OnMove);
             ((System.ComponentModel.ISupportInitialize)(this.screenPicture)).EndInit();
             this.RightClickMenu.ResumeLayout(false);
             this.ResumeLayout(false);

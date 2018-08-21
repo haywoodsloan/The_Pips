@@ -14,5 +14,8 @@
     <Setting Name="LastSize" Type="System.Drawing.Size" Scope="User">
       <Value Profile="(Default)">480, 270</Value>
     </Setting>
+    <Setting Name="AlwaysOnTop" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

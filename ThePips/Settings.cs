@@ -21,7 +21,7 @@ namespace PictureInPicture
             InitializeComponent();
             fpsSlider.Value = Math.Min(fpsSlider.Maximum, 1000 / Properties.Settings.Default.RefreshDelay);
             fpsLabel.Text = fpsSlider.Value.ToString();
-            alwayOnTop.Checked = pip.TopMost;
+            alwayOnTop.Checked = Properties.Settings.Default.AlwaysOnTop;
 
             fpsLabel.DataBindings.Add(new Binding("Text", fpsSlider, "Value"));
             fpsSlider.DataBindings.Add(new Binding("Value", fpsLabel, "Text"));

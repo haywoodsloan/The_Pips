@@ -48,6 +48,7 @@ namespace PictureInPicture
             SetStyle(ControlStyles.ResizeRedraw, true);
             Size = Properties.Settings.Default.LastSize;
             Location = Properties.Settings.Default.LastPosition;
+            TopMost = Properties.Settings.Default.AlwaysOnTop;
 
             // Setup the drawing tools.
             // Colors can be defined as alpha, red, green, and blue values between 0 and 255.
@@ -74,7 +75,7 @@ namespace PictureInPicture
         // The bitmap's Graphics will allow us to copy from the screen.
         // Set the PictureBox's image to the new Bitmap.
         public void SetCaptureScreen(int screenIndex)
-        {            
+        {
             // Save the new setting if it is changed.
             if (screenPicture.Image == null ||
                 screenIndex != Properties.Settings.Default.CaptureScreenIndex)
@@ -105,7 +106,18 @@ namespace PictureInPicture
                 Properties.Settings.Default.Save();
             }
         }
-        
+
+        // Sets and saves if the form is top most.
+        public void SaveTopMost(bool topMost)
+        {
+            TopMost = topMost;
+            if (Properties.Settings.Default.AlwaysOnTop != topMost)
+            {
+                Properties.Settings.Default.AlwaysOnTop = topMost;
+                Properties.Settings.Default.Save();
+            }
+        }
+
         // Capture a screenshot.
         private void CaptureScreen(object sender, EventArgs e)
         {
@@ -182,11 +194,17 @@ namespace PictureInPicture
             // Finally close the window.
             Close();
         }
-        
+
         // Runs when the settings options is selected in the right click menu.
         private void OnSettings(object sender, EventArgs e)
         {
-            new Settings(this).ShowDialog();
+            bool oldTopMost = TopMost;
+            TopMost = false;
+
+            if (new Settings(this).ShowDialog() != DialogResult.Yes)
+            {
+                TopMost = oldTopMost;
+            }
         }
 
         // Allows the screen to be moved whenever there is a mouse click.

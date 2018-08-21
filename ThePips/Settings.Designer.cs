@@ -236,7 +236,6 @@
             this.MinimizeBox = false;
             this.Name = "Settings";
             this.Text = "Settings";
-            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.OnClose);
             ((System.ComponentModel.ISupportInitialize)(this.screenPreview)).EndInit();
             this.tableLayoutPanel1.ResumeLayout(false);
             this.tableLayoutPanel1.PerformLayout();

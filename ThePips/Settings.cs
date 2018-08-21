@@ -21,6 +21,7 @@ namespace PictureInPicture
             InitializeComponent();
             fpsSlider.Value = Math.Min(fpsSlider.Maximum, 1000 / Properties.Settings.Default.RefreshDelay);
             fpsLabel.Text = fpsSlider.Value.ToString();
+            alwayOnTop.Checked = pip.TopMost;
 
             fpsLabel.DataBindings.Add(new Binding("Text", fpsSlider, "Value"));
             fpsSlider.DataBindings.Add(new Binding("Value", fpsLabel, "Text"));
@@ -36,21 +37,15 @@ namespace PictureInPicture
             }
 
             CaptureScreen(screenCombo.SelectedIndex);
-            alwayOnTop.Checked = pip.TopMost;
-            pip.TopMost = false;
         }
 
         private void OnSaveClick(object sender, EventArgs e)
         {
             pip.SetupCaptureTimer(1000 / fpsSlider.Value);
             pip.SetCaptureScreen(screenCombo.SelectedIndex);
-            
-            if (Properties.Settings.Default.AlwaysOnTop != alwayOnTop.Checked)
-            {
-                Properties.Settings.Default.AlwaysOnTop = alwayOnTop.Checked;
-                Properties.Settings.Default.Save();
-            }
+            pip.SaveTopMost(alwayOnTop.Checked);
 
+            DialogResult = DialogResult.Yes;
             Close();
         }
 
@@ -72,11 +67,6 @@ namespace PictureInPicture
         private void OnSelectedChange(object sender, EventArgs e)
         {
             CaptureScreen(screenCombo.SelectedIndex);
-        }
-
-        private void OnClose(object sender, FormClosedEventArgs e)
-        {
-            pip.TopMost = alwayOnTop.Checked;
         }
     }
 }

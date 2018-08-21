@@ -60,27 +60,28 @@
             this.SettingsMenuItem});
             this.RightClickMenu.Name = "RightClickMenu";
             this.RightClickMenu.ShowImageMargin = false;
-            this.RightClickMenu.Size = new System.Drawing.Size(98, 48);
+            this.RightClickMenu.Size = new System.Drawing.Size(103, 48);
             // 
             // CloseMenuItem
             // 
             this.CloseMenuItem.BackColor = System.Drawing.Color.DimGray;
             this.CloseMenuItem.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.CloseMenuItem.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Bold);
+            this.CloseMenuItem.Font = new System.Drawing.Font("Arial", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.CloseMenuItem.ForeColor = System.Drawing.Color.WhiteSmoke;
             this.CloseMenuItem.Name = "CloseMenuItem";
-            this.CloseMenuItem.Size = new System.Drawing.Size(97, 22);
+            this.CloseMenuItem.Size = new System.Drawing.Size(102, 22);
             this.CloseMenuItem.Text = "Close";
             this.CloseMenuItem.Click += new System.EventHandler(this.CloseClick);
             // 
             // SettingsMenuItem
             // 
             this.SettingsMenuItem.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.SettingsMenuItem.Font = new System.Drawing.Font("Arial", 9F, System.Drawing.FontStyle.Bold);
+            this.SettingsMenuItem.Font = new System.Drawing.Font("Arial", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.SettingsMenuItem.ForeColor = System.Drawing.Color.WhiteSmoke;
             this.SettingsMenuItem.Name = "SettingsMenuItem";
-            this.SettingsMenuItem.Size = new System.Drawing.Size(97, 22);
+            this.SettingsMenuItem.Size = new System.Drawing.Size(102, 22);
             this.SettingsMenuItem.Text = "Settings";
+            this.SettingsMenuItem.Click += new System.EventHandler(this.OnSettings);
             // 
             // Pip
             // 
@@ -94,6 +95,7 @@
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "Pip";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.Manual;
             this.Text = "Picture-In-Picture";
             this.TopMost = true;
             this.ClientSizeChanged += new System.EventHandler(this.OnClientResize);

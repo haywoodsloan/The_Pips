@@ -3,7 +3,6 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
-using PictureInPicture.Properties;
 
 namespace PictureInPicture
 {
@@ -58,11 +57,11 @@ namespace PictureInPicture
             CalculateHitRectangles();
 
             // Set the capture screen to the default.
-            SetCaptureScreen(Settings.Default.CaptureScreenIndex);
+            SetCaptureScreen(Properties.Settings.Default.CaptureScreenIndex);
 
             // Begin a loop of capturing a screenshot and showing it in  window.
             // Use a PictureBox to render the bitmap screenshot.
-            SetupCaptureTimer(Settings.Default.RefreshDelay);
+            SetupCaptureTimer(Properties.Settings.Default.RefreshDelay);
             timer.Tick += CaptureScreen;
             timer.Start();
         }
@@ -84,10 +83,10 @@ namespace PictureInPicture
             }
 
             // Save the new setting if it is changed.
-            if (screenIndex != Settings.Default.CaptureScreenIndex)
+            if (screenIndex != Properties.Settings.Default.CaptureScreenIndex)
             {
-                Settings.Default.CaptureScreenIndex = screenIndex;
-                Settings.Default.Save();
+                Properties.Settings.Default.CaptureScreenIndex = screenIndex;
+                Properties.Settings.Default.Save();
             }
         }
 
@@ -97,10 +96,10 @@ namespace PictureInPicture
             timer.Interval = interval;
 
             // Save the new settings if it is changed.
-            if (interval != Settings.Default.RefreshDelay)
+            if (interval != Properties.Settings.Default.RefreshDelay)
             {
-                Settings.Default.RefreshDelay = interval;
-                Settings.Default.Save();
+                Properties.Settings.Default.RefreshDelay = interval;
+                Properties.Settings.Default.Save();
             }
         }
 
@@ -175,6 +174,17 @@ namespace PictureInPicture
 
             // Finally close the window.
             Close();
+        }
+        
+        // Runs when the settings options is selected in the right click menu.
+        private void OnSettings(object sender, EventArgs e)
+        {
+            var settings = new Settings(this);
+
+            TopMost = false;
+            settings.ShowDialog();
+
+            TopMost = true;
         }
 
         // Allows the screen to be moved whenever there is a mouse click.
@@ -253,5 +263,6 @@ namespace PictureInPicture
         public static extern bool ReleaseCapture();
 
         #endregion
+
     }
 }

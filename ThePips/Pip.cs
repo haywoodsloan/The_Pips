@@ -40,6 +40,21 @@ namespace PictureInPicture
         private Rectangle HitBottomRight;
         private const int hitMargin = 10;
 
+        // Make TopMost a private set because other 
+        // windows should use SaveTopMost instead.
+        public new bool TopMost
+        {
+            get
+            {
+                return base.TopMost;
+            }
+
+            private set
+            {
+                base.TopMost = value;
+            }
+        }
+
         public Pip()
         {
             // Setup the windows as designed in the drag-and-drop designer.

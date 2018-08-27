@@ -19,29 +19,24 @@ namespace PictureInPicture
             this.pip = pip;
 
             InitializeComponent();
-            fpsSlider.Value = Math.Min(fpsSlider.Maximum, 1000 / Properties.Settings.Default.RefreshDelay);
+
             fpsLabel.Text = fpsSlider.Value.ToString();
             alwayOnTop.Checked = Properties.Settings.Default.AlwaysOnTop;
 
+            int rawValue = (int)Math.Round(1000 / Properties.Settings.Default.RefreshDelay);
+            fpsSlider.Value = Math.Min(Math.Max(rawValue, fpsSlider.Minimum), fpsSlider.Maximum);
             fpsLabel.DataBindings.Add(new Binding("Text", fpsSlider, "Value"));
-            fpsSlider.DataBindings.Add(new Binding("Value", fpsLabel, "Text"));
 
             screenCombo.Items.AddRange(Enumerable.Range(0, Screen.AllScreens.Length).Cast<object>().ToArray());
-            if (Properties.Settings.Default.CaptureScreenIndex < Screen.AllScreens.Length)
-            {
-                screenCombo.SelectedIndex = Properties.Settings.Default.CaptureScreenIndex;
-            }
-            else
-            {
-                screenCombo.SelectedIndex = 0;
-            }
+            screenCombo.SelectedIndex = Math.Min(Properties.Settings.Default.CaptureScreenIndex,
+                Screen.AllScreens.Length);
 
             CaptureScreen(screenCombo.SelectedIndex);
         }
 
         private void OnSaveClick(object sender, EventArgs e)
         {
-            pip.SetupCaptureTimer(1000 / fpsSlider.Value);
+            pip.SetupCaptureTimer(1000f / fpsSlider.Value);
             pip.SetCaptureScreen(screenCombo.SelectedIndex);
             pip.SaveTopMost(alwayOnTop.Checked);
 

@@ -2,7 +2,10 @@
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
+using System.Threading;
 using System.Windows.Forms;
+
+using Timer = System.Threading.Timer;
 
 namespace PictureInPicture
 {
@@ -27,7 +30,7 @@ namespace PictureInPicture
         private Bitmap image;
 
         // Timer for automatically triggering the screen capture.
-        private readonly Timer timer = new Timer();
+        private readonly Timer timer;
 
         // The margin for hitting the screen resize.
         private Rectangle HitTop;
@@ -81,9 +84,8 @@ namespace PictureInPicture
 
             // Begin a loop of capturing a screenshot and showing it in  window.
             // Use a PictureBox to render the bitmap screenshot.
+            timer = new Timer(CaptureScreen);
             SetupCaptureTimer(Properties.Settings.Default.RefreshDelay);
-            timer.Tick += CaptureScreen;
-            timer.Start();
         }
 
         // Get the size of the secondary window.
@@ -112,9 +114,9 @@ namespace PictureInPicture
         }
 
         // Set the interval of the capture timer.
-        public void SetupCaptureTimer(int interval)
+        public void SetupCaptureTimer(float interval)
         {
-            timer.Interval = interval;
+            timer.Change(TimeSpan.Zero, TimeSpan.FromMilliseconds(interval));
 
             // Save the new settings if it is changed.
             if (interval != Properties.Settings.Default.RefreshDelay)
@@ -136,7 +138,7 @@ namespace PictureInPicture
         }
 
         // Capture a screenshot.
-        private void CaptureScreen(object sender, EventArgs e)
+        private void CaptureScreen(object state)
         {
             // Use a try-catch just in case there are any exceptions.
             // If there are exceptions ignore them and just try again on the next frame.
@@ -194,7 +196,7 @@ namespace PictureInPicture
                 }
 
                 // Force the PictureBox to redraw to it will show the new bitmap image.
-                screenPicture.Refresh();
+                screenPicture.BeginInvoke(new Action(() => screenPicture.Refresh()));
             }
             catch { }
         }
@@ -206,7 +208,7 @@ namespace PictureInPicture
             Properties.Settings.Default.Save();
 
             // Stop the timer from triggering another screen capture.
-            timer.Stop();
+            timer.Change(Timeout.Infinite, Timeout.Infinite);
 
             // Finally close the window.
             Close();

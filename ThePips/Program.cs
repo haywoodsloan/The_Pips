@@ -14,6 +14,8 @@ namespace PictureInPicture
         [STAThread]
         static void Main()
         {
+            Properties.Settings.Default.Upgrade();
+
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new Pip());

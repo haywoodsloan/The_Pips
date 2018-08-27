@@ -26,9 +26,9 @@ namespace PictureInPicture.Properties {
         [global::System.Configuration.UserScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.DefaultSettingValueAttribute("100")]
-        public int RefreshDelay {
+        public float RefreshDelay {
             get {
-                return ((int)(this["RefreshDelay"]));
+                return ((float)(this["RefreshDelay"]));
             }
             set {
                 this["RefreshDelay"] = value;

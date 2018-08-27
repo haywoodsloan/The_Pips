@@ -37,7 +37,8 @@ namespace PictureInPicture
             
             timer = new Timer(CaptureScreen);
             SetCaptureScreen(screenCombo.SelectedIndex);
-            timer.Change(TimeSpan.Zero, TimeSpan.FromSeconds(2));
+            var refreshSpan = TimeSpan.FromMilliseconds(Properties.Settings.Default.RefreshDelay);
+            timer.Change(TimeSpan.Zero, refreshSpan);
         }
 
         private void OnSaveClick(object sender, EventArgs e)
@@ -80,10 +81,20 @@ namespace PictureInPicture
             }
         }
 
-        private void OnSelectedChange(object sender, EventArgs e)
+        private void OnScreenSelectedChange(object sender, EventArgs e)
         {
             SetCaptureScreen(screenCombo.SelectedIndex);
-            timer?.Change(TimeSpan.Zero, TimeSpan.FromSeconds(2));
+        }
+
+        private void OnFpsSelectedChange(object sender, EventArgs e)
+        {
+            var refreshSpan = TimeSpan.FromMilliseconds(1000f / fpsSlider.Value);
+            timer.Change(refreshSpan, refreshSpan);
+        }
+
+        private void OnClose(object sender, FormClosingEventArgs e)
+        {
+            timer.Dispose();
         }
     }
 }

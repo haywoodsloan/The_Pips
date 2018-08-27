@@ -101,7 +101,8 @@ namespace PictureInPicture
         // Set the interval of the capture timer.
         public void SetupCaptureTimer(float interval)
         {
-            timer.Change(TimeSpan.Zero, TimeSpan.FromMilliseconds(interval));
+            var intervalSpan = TimeSpan.FromMilliseconds(interval);
+            timer.Change(TimeSpan.Zero, intervalSpan);
 
             // Save the new settings if it is changed.
             if (interval != Properties.Settings.Default.RefreshDelay)
@@ -203,11 +204,13 @@ namespace PictureInPicture
         private void OnSettings(object sender, EventArgs e)
         {
             bool oldTopMost = TopMost;
+            timer.Change(0, 0);
             TopMost = false;
 
             if (new Settings(this).ShowDialog() != DialogResult.Yes)
             {
                 TopMost = oldTopMost;
+                SetupCaptureTimer(Properties.Settings.Default.RefreshDelay);
             }
         }
 

@@ -72,7 +72,7 @@
             this.screenCombo.Name = "screenCombo";
             this.screenCombo.Size = new System.Drawing.Size(61, 21);
             this.screenCombo.TabIndex = 1;
-            this.screenCombo.SelectedIndexChanged += new System.EventHandler(this.OnSelectedChange);
+            this.screenCombo.SelectedIndexChanged += new System.EventHandler(this.OnScreenSelectedChange);
             // 
             // screenPreview
             // 
@@ -134,6 +134,7 @@
             this.fpsSlider.TabIndex = 6;
             this.fpsSlider.TickStyle = System.Windows.Forms.TickStyle.None;
             this.fpsSlider.Value = 15;
+            this.fpsSlider.Scroll += new System.EventHandler(this.OnFpsSelectedChange);
             // 
             // tableLayoutPanel2
             // 
@@ -236,6 +237,7 @@
             this.MinimizeBox = false;
             this.Name = "Settings";
             this.Text = "Settings";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.OnClose);
             ((System.ComponentModel.ISupportInitialize)(this.screenPreview)).EndInit();
             this.tableLayoutPanel1.ResumeLayout(false);
             this.tableLayoutPanel1.PerformLayout();

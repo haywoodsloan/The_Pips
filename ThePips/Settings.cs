@@ -4,11 +4,19 @@ using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 
+using Timer = System.Threading.Timer;
+
 namespace PictureInPicture
 {
     public partial class Settings : Form
     {
         private Pip pip;
+        private Timer timer;
+
+        private object captureLock = new object();
+        private Graphics graphics;
+        private Rectangle bounds;
+        private Bitmap bitmap;
 
         public Settings(Pip pip)
         {
@@ -26,8 +34,10 @@ namespace PictureInPicture
             screenCombo.Items.AddRange(Enumerable.Range(0, Screen.AllScreens.Length).Cast<object>().ToArray());
             screenCombo.SelectedIndex = Math.Min(Properties.Settings.Default.CaptureScreenIndex,
                 Screen.AllScreens.Length);
-
-            CaptureScreen(screenCombo.SelectedIndex);
+            
+            timer = new Timer(CaptureScreen);
+            SetCaptureScreen(screenCombo.SelectedIndex);
+            timer.Change(TimeSpan.Zero, TimeSpan.FromSeconds(2));
         }
 
         private void OnSaveClick(object sender, EventArgs e)
@@ -45,19 +55,35 @@ namespace PictureInPicture
             Close();
         }
 
-        private void CaptureScreen(int screenIndex)
+        private void CaptureScreen(object state)
         {
-            var bounds = Screen.AllScreens[screenIndex].Bounds;
-            var bitmap = new Bitmap(bounds.Width, bounds.Height);
-            var graphics = Graphics.FromImage(bitmap);
+            try
+            {
+                lock (captureLock)
+                {
+                    graphics.CopyFromScreen(bounds.X, bounds.Y, 0, 0, bounds.Size);
+                }
 
-            graphics.CopyFromScreen(bounds.X, bounds.Y, 0, 0, bounds.Size);
-            screenPreview.Image = bitmap;
+                screenPreview.BeginInvoke(new Action(() => screenPreview.Refresh()));
+            }
+            catch { }
+        }
+
+        private void SetCaptureScreen(int screenIndex)
+        {
+            lock (captureLock)
+            {
+                bounds = Screen.AllScreens[screenCombo.SelectedIndex].Bounds;
+                bitmap = new Bitmap(bounds.Width, bounds.Height);
+                graphics = Graphics.FromImage(bitmap);
+                screenPreview.Image = bitmap;
+            }
         }
 
         private void OnSelectedChange(object sender, EventArgs e)
         {
-            CaptureScreen(screenCombo.SelectedIndex);
+            SetCaptureScreen(screenCombo.SelectedIndex);
+            timer?.Change(TimeSpan.Zero, TimeSpan.FromSeconds(2));
         }
     }
 }

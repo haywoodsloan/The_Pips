@@ -14,11 +14,16 @@ namespace PictureInPicture
         [STAThread]
         static void Main()
         {
-            Properties.Settings.Default.Upgrade();
-
-            Application.EnableVisualStyles();
-            Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new Pip());
+            try
+            {
+                Properties.Settings.Default.Upgrade();
+                Application.EnableVisualStyles();
+                Application.SetCompatibleTextRenderingDefault(false);
+                Application.Run(new Pip());
+            } catch (Exception e)
+            {
+                MessageBox.Show($"The following exception was thrown:\n\n{e.ToString()}", "The Pips Fatal Error");
+            }
         }
     }
 }

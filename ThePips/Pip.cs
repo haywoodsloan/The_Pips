@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
@@ -13,7 +14,7 @@ namespace PictureInPicture
     {
         // Constants that define what the mouse analog should look like.
         // Starting with floats because lots of division will happen later
-        //  prevents rounding errors like intergers would have.
+        // prevents rounding errors like intergers would have.
         const float CircleRadius = 15;
         const float DotRadius = 3;
         const float PenWidth = 2;
@@ -144,8 +145,8 @@ namespace PictureInPicture
                         // The bitmap coordinates start at 0, 0.
                         // The secondary screen's coordinates probably start somewhere more like 1920, 0.
                         // The mouse's coordinates need to be translated so they are accurate on the bitmap.
-                        var x = position.X - bounds.X;
-                        var y = position.Y - bounds.Y;
+                        int x = position.X - bounds.X;
+                        int y = position.Y - bounds.Y;
 
                         // The mouse analog will be drawn directly on the bitmap.
                         // Since the bitmap will be scaled down to fit to PictureBox so will the mouse analog.
@@ -154,30 +155,15 @@ namespace PictureInPicture
                         // The scaleing factor can simply be calculated as the ratio of the bitmap's size to the PictureBox's.
                         // However, the bitmap's aspect ratio doesn't have to match the PictureBox's.
                         // Therefore, the max between the width and height ratios is used.
-                        var scaleFactor = Math.Max((float)bounds.Width / screenPicture.Width,
+                        float scaleFactor = Math.Max((float)bounds.Width / screenPicture.Width,
                                               (float)bounds.Height / screenPicture.Height);
 
-                        // Scale the circle's radius.
-                        // Then define a square that circumscribes the desired circle.
-                        // The square should be centered around the mouse position.
-                        // Therefore, the X and Y of the square need to be offset by radius / 2.
-                        float scaledCircleRadius = CircleRadius * scaleFactor;
-                        var circle = new RectangleF(x - scaledCircleRadius / 2, y - scaledCircleRadius / 2,
-                                                    scaledCircleRadius, scaledCircleRadius);
-
-                        // Same as for the circle, just for the smaller center dot.
-                        float scaledDotRadius = DotRadius * scaleFactor;
-                        var dot = new RectangleF(x - scaledDotRadius / 2, y - scaledDotRadius / 2,
-                                                 scaledDotRadius, scaledDotRadius);
-
-                        // Adjust the pen's witdh using the scaling factor too.
-                        //  keeps the border a consistent thickness.
-                        pen.Width = PenWidth * scaleFactor;
-
                         // Finally draw the mouse analog.
-                        graphics.FillEllipse(brush, circle);
-                        graphics.DrawEllipse(pen, circle);
-                        graphics.FillEllipse(Brushes.Black, dot);
+                        var cursorImage = CaptureCursor(out float xOffset, out float yOffset);                       
+                        var cursorRect = new RectangleF(x - xOffset * scaleFactor, y - yOffset * scaleFactor, 
+                            cursorImage.Width * scaleFactor, cursorImage.Height * scaleFactor);
+
+                        graphics.DrawImage(cursorImage, cursorRect);                        
                     }
                 }
 
@@ -218,7 +204,7 @@ namespace PictureInPicture
         private void OnMouseDown(object sender, MouseEventArgs e)
         {
             // If a left mouse click happens anywhere on the window tell the window it was the top bar.
-            //  lets us move the window anytime it is clicked and dragged.
+            // lets us move the window anytime it is clicked and dragged.
             if (e.Button == MouseButtons.Left)
             {
                 ReleaseCapture();
@@ -278,6 +264,69 @@ namespace PictureInPicture
             }
         }
 
+        static Bitmap CaptureCursor(out float xOffset, out float yOffset)
+        {
+            xOffset = yOffset = 0;
+            CURSORINFO cursorInfo = new CURSORINFO();
+            cursorInfo.cbSize = Marshal.SizeOf(cursorInfo);
+            if (!GetCursorInfo(ref cursorInfo))
+                return null;
+
+            if (cursorInfo.flags != CURSOR_SHOWING)
+                return null;
+
+            IntPtr hicon = CopyIcon(cursorInfo.hCursor);
+            if (hicon == IntPtr.Zero)
+                return null;
+
+            ICONINFO iconInfo;
+            if (!GetIconInfo(hicon, out iconInfo))
+                return null;
+
+            xOffset = iconInfo.xHotspot;
+            yOffset = iconInfo.yHotspot;
+
+            using (Bitmap maskBitmap = Bitmap.FromHbitmap(iconInfo.hbmMask))
+            {
+                // Is this a monochrome cursor?
+                if (maskBitmap.Height == maskBitmap.Width * 2)
+                {
+                    Bitmap resultBitmap = new Bitmap(maskBitmap.Width, maskBitmap.Width);
+
+                    Graphics desktopGraphics = Graphics.FromHwnd(GetDesktopWindow());
+                    IntPtr desktopHdc = desktopGraphics.GetHdc();
+
+                    IntPtr maskHdc = CreateCompatibleDC(desktopHdc);
+                    IntPtr oldPtr = SelectObject(maskHdc, maskBitmap.GetHbitmap());
+
+                    using (Graphics resultGraphics = Graphics.FromImage(resultBitmap))
+                    {
+                        IntPtr resultHdc = resultGraphics.GetHdc();
+
+                        // These two operation will result in a black cursor over a white background.
+                        // Later in the code, a call to MakeTransparent() will get rid of the white background.
+                        BitBlt(resultHdc, 0, 0, 32, 32, maskHdc, 0, 32, TernaryRasterOperations.SRCCOPY);
+                        BitBlt(resultHdc, 0, 0, 32, 32, maskHdc, 0, 0, TernaryRasterOperations.SRCINVERT);
+
+                        resultGraphics.ReleaseHdc(resultHdc);
+                    }
+
+                    IntPtr newPtr = SelectObject(maskHdc, oldPtr);
+                    DeleteObject(newPtr);
+                    DeleteDC(maskHdc);
+                    desktopGraphics.ReleaseHdc(desktopHdc);
+
+                    // Remove the white background from the BitBlt calls,
+                    // resulting in a black cursor over a transparent background.
+                    resultBitmap.MakeTransparent(Color.White);
+                    return resultBitmap;
+                }
+            }
+
+            Icon icon = Icon.FromHandle(hicon);
+            return icon.ToBitmap();
+        }
+
         #region Native Code
 
         private const int HTLEFT = 10;
@@ -293,14 +342,89 @@ namespace PictureInPicture
         private const int WM_NCLBUTTONDOWN = 0xA1;
 
         private const int HT_CAPTION = 0x2;
+               
+        private const int CURSOR_SHOWING = 0x00000001;
 
-        [DllImportAttribute("user32.dll")]
+        enum TernaryRasterOperations : uint
+        {
+            SRCCOPY = 0x00CC0020,
+            SRCPAINT = 0x00EE0086,
+            SRCAND = 0x008800C6,
+            SRCINVERT = 0x00660046,
+            SRCERASE = 0x00440328,
+            NOTSRCCOPY = 0x00330008,
+            NOTSRCERASE = 0x001100A6,
+            MERGECOPY = 0x00C000CA,
+            MERGEPAINT = 0x00BB0226,
+            PATCOPY = 0x00F00021,
+            PATPAINT = 0x00FB0A09,
+            PATINVERT = 0x005A0049,
+            DSTINVERT = 0x00550009,
+            BLACKNESS = 0x00000042,
+            WHITENESS = 0x00FF0062,
+            CAPTUREBLT = 0x40000000
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        struct POINT
+        {
+            public int x;
+            public int y;
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        struct CURSORINFO
+        {
+            public int cbSize;
+            public int flags;
+            public IntPtr hCursor;
+            public POINT ptScreenPos;
+        }
+
+        struct ICONINFO
+        {
+            public bool fIcon;
+            public int xHotspot;
+            public int yHotspot;
+            public IntPtr hbmMask;
+            public IntPtr hbmColor;
+        }
+
+        [DllImport("user32.dll")]
         public static extern int SendMessage(IntPtr hWnd,
                          int Msg, int wParam, int lParam);
-        [DllImportAttribute("user32.dll")]
+        [DllImport("user32.dll")]
         public static extern bool ReleaseCapture();
+        
+        [DllImport("user32.dll")]
+        static extern bool GetCursorInfo(ref CURSORINFO pci);
+
+        [DllImport("user32.dll")]
+        static extern IntPtr CopyIcon(IntPtr hIcon);
+
+        [DllImport("user32.dll")]
+        static extern bool GetIconInfo(IntPtr hIcon, out ICONINFO piconinfo);
+
+        [DllImport("user32.dll", SetLastError = false)]
+        static extern IntPtr GetDesktopWindow();
+
+        [DllImport("gdi32.dll", EntryPoint = "CreateCompatibleDC", SetLastError = true)]
+        static extern IntPtr CreateCompatibleDC([In] IntPtr hdc);
+
+        [DllImport("gdi32.dll", EntryPoint = "SelectObject")]
+        public static extern IntPtr SelectObject([In] IntPtr hdc, [In] IntPtr hgdiobj);
+
+        [DllImport("gdi32.dll", EntryPoint = "BitBlt", SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        static extern bool BitBlt([In] IntPtr hdc, int nXDest, int nYDest, int nWidth, int nHeight, [In] IntPtr hdcSrc, int nXSrc, int nYSrc, TernaryRasterOperations dwRop);
+
+        [DllImport("gdi32.dll", EntryPoint = "DeleteObject")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool DeleteObject([In] IntPtr hObject);
+
+        [DllImport("gdi32.dll", EntryPoint = "DeleteDC")]
+        public static extern bool DeleteDC([In] IntPtr hdc);
 
         #endregion
-
     }
 }

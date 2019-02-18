@@ -127,7 +127,7 @@
             // 
             this.fpsSlider.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Left | System.Windows.Forms.AnchorStyles.Right)));
             this.fpsSlider.Location = new System.Drawing.Point(3, 3);
-            this.fpsSlider.Maximum = 60;
+            this.fpsSlider.Maximum = 144;
             this.fpsSlider.Minimum = 1;
             this.fpsSlider.Name = "fpsSlider";
             this.fpsSlider.Size = new System.Drawing.Size(263, 25);

@@ -163,7 +163,7 @@ namespace PictureInPicture
                         var cursorRect = new RectangleF(x - xOffset * scaleFactor, y - yOffset * scaleFactor, 
                             cursorImage.Width * scaleFactor, cursorImage.Height * scaleFactor);
 
-                        graphics.DrawImage(cursorImage, cursorRect);                        
+                        graphics.DrawImage(cursorImage, cursorRect);
                     }
                 }
 

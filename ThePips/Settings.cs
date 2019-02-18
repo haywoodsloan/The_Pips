@@ -64,8 +64,8 @@ namespace PictureInPicture
                 {
                     graphics.CopyFromScreen(bounds.X, bounds.Y, 0, 0, bounds.Size);
                 }
-
-                screenPreview.BeginInvoke(new Action(() => screenPreview.Refresh()));
+                
+                screenPreview.BeginInvoke(new Action(screenPreview.Refresh));
             }
             catch { }
         }

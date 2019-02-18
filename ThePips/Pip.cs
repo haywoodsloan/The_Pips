@@ -182,7 +182,7 @@ namespace PictureInPicture
                 }
 
                 // Force the PictureBox to redraw to it will show the new bitmap image.
-                screenPicture.BeginInvoke(new Action(() => screenPicture.Refresh()));
+                screenPicture.BeginInvoke(new Action(screenPicture.Refresh));
             }
             catch { }
         }
